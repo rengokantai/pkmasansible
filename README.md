@@ -192,3 +192,96 @@ using `creates`
 ```
 
 
+#####5 roles 
+file.yaml
+```
+---
+- name: create leading path
+  file:
+    path: "{{ path }}"
+    state: directory
+
+- name: touch the file
+  file:
+    path: "{{ path + '/' + file }}"
+    state: touch
+```
+this is untuitive, to use this file. we first include this file, then pass along the params.  
+master.yaml
+```
+---
+- name: touch files
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - include: files.yaml
+      path: /tmp/foo
+      file: a.txt
+
+    - include: files.yaml
+      path: /tmp/foo
+      file: b.txt
+```
+
+with_dict directive usage:
+```
+---
+- name: create leading path
+  file:
+    path: "{{ item.value.path }}"
+    state: directory
+  with_dict: files
+
+- name: touch the file
+  file:
+    path: "{{ item.value.path + '/' + item.key }}"
+    state: touch
+  with_dict: files
+```
+
+file module has two directives: path and state (touch,directory)  
+`files` is a user-defined dict. item is built-in variable. one key may has multiple values.  
+Hence:
+```
+---
+- name: touch files
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - include: files.yaml
+      vars:
+        files:
+          a.txt:
+            path: /tmp/foo
+          b.txt:
+            path: /tmp/foo
+```
+
+--extra-vars = -e  
+-e can also pass filename. Ex   
+```
+ansible-playbook file.yaml -e @var.yaml
+```
+
+`include_vars`: dynamically get arg from filenames. use with `with_first_found`  
+Ex:
+```
+---
+- name:
+  hosts: localhost
+  gather_facts: true
+
+  tasks:
+    - name: get var from first found file
+      include_vars: "{{ item }}"
+      with_first_found:
+        - "{{ ansible_distribution }}.yaml"
+        -  variables.yaml
+
+    - name:
+      debug:
+        msg: "{{ name }}"
+```
+
