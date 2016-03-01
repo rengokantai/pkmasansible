@@ -285,3 +285,89 @@ Ex:
         msg: "{{ name }}"
 ```
 
+using roles.(defaults,files,handlers,templates,vars,tasks,meta,library)  
+
+meta/main.yaml
+```
+---
+dependencies:
+  - role: a
+  - role: b
+```
+This role depends on role a and b.  
+
+More complex: assign vars with roles
+```
+---
+dependencies:
+  - role: common
+    a: True
+    b: False
+  - role: apache
+    complex_var:
+      key1: value1
+      key2: value2
+    short_list:
+      - 8080
+      - 80
+```
+
+in main.yaml we ca assign var to override var is child files.  
+main.yaml without override
+```
+---
+- hosts: localhost
+  gather_facts: false
+
+  roles:
+    - role: simple
+```
+override some vars:
+```
+---
+- hosts: localhost
+  gather_facts: false
+
+  roles:
+    - role: simple
+      a: newval
+```
+
+using multiple roles:
+```
+---
+- hosts: localhost
+  gather_facts: false
+
+  roles:
+    - role: simple
+      a: newval
+    - role: second_role
+      othervar: value
+    - role: third_role
+    - role: another_role
+```
+
+ansible-galaxy usage
+```
+ansible-galaxy install -p roles/ user.rolename
+```
+
+other commands
+```
+ansible-galaxy list -p roles/
+ansible-galaxy info -p roles/ user.rolename
+```
+
+create a new role (w/ 7 folders)
+```
+ansible-galaxy init -p roles/ newrole
+```
+rename downloaded rolename
+```
+ansible-galaxy install -p /opt/ansible/roles rengokantai@git...git,version(canomit),newname
+```
+To install all the roles within a file, use the --roles-file (-r) option.
+```
+ansible-galaxy install --roles-file y.yaml
+```
