@@ -55,3 +55,83 @@ max_fail_percentage  #% of hosts failed before whole operation halted
 no_log
 port
 ```
+#####2
+```
+ansible-vault create vault-password-file file encrypt.yml
+```
+execute a encrypted playbook
+```
+ansible-playbook -i hostname --valut-password-file file encrypt.yml -vv
+```
+
+if main playbook includes encrypted file, use
+```
+--ask-vault-pass
+```
+
+#####3 Jinja2
+macros
+```
+{% macro test(var_a='string') -%}
+{{test.argumants}}
+{{test.defaults}}
+{%- endmacro %}
+
+{{test()}}
+```
+will return ('var_a',)('string',)
+```
+{% macro test() -%}
+{{kwargs}}
+{{test.catch_kwargs}}
+{%- endmacro %}
+
+{{test(key='value')}}
+```
+will return {'key':'value'}(True)
+```
+{% macro test() -%}
+{{varargs}}
+{{test.catch_varargs}}
+{%- endmacro %}
+
+{{test('value')}}
+```
+will return ('value',)(True)  
+  
+caller  
+```
+{% macro test() -%}
+1
+{{caller()}}
+{%- endmacro %}
+
+{% call test() %}
+2
+{% endcall %}
+```
+will return 1 2  
+
+pass arguments in call block:
+```
+{% macro test(group, hosts) -%}
+{% for host in hosts %}
+{{ host }} {{ caller(host) }}
+{%- endfor %}
+{%- endmacro %}
+{% call(host) test('db', ['1', '2','3']) %}
+ssh_host_name={{ host }}.example.name
+{% endcall %}
+```
+
+filters:  
+```
+{{var | replace('a','b')|lower| default('default')|count}}
+```
+some others:
+```
+basename
+dirname
+shuffle
+random
+```
