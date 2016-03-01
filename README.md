@@ -135,3 +135,60 @@ dirname
 shuffle
 random
 ```
+#####4
+using failed_when
+```
+- name:
+  command: /sbin/icsciadm -m sessions
+  register: sessions
+  failed_when sessions.rc not in (1,3)
+```
+
+rc: return code  
+
+judge a git branch exist, delete it if exists, skip otherwise.  
+1st version
+```
+- name:
+  command: git branch
+  register: branches
+- name:
+  command: git branch -D feature
+  args:
+    chdir: /app
+  when: branches.stdout | search('feature')
+```
+
+2nd version:
+```
+- name:
+  command: git branch -D feature
+  args:
+    chdir: /app
+  register: outresult
+  failed_when: outresult.rc!=0 and not outresult.stderr |search ('branch.*not found')
+```
+
+changed_when: mark changed=1.  
+
+
+creates and removes argument in command family modules.(command,shell,script)
+1st version
+```
+- name: exist?
+  stat:
+    path: /srv
+  register: srv
+
+- name: run script
+  script: files/script --initialize /srv
+  when: not srv.stat.exists
+```
+
+using `creates`
+```
+- name: run script
+  script: files/script creates=/srv
+```
+
+
