@@ -371,3 +371,23 @@ To install all the roles within a file, use the --roles-file (-r) option.
 ```
 ansible-galaxy install --roles-file y.yaml
 ```
+#####7 troubleshooting
+prefer bracket notation.Ex
+```
+---
+- name: sub-element styles
+  hosts: localhost
+  gather_facts: false
+  vars:
+    - dic:
+        keys:
+          - a
+          - b
+  tasks:
+    - name: subscript
+      debug:
+        var: dic['keys']
+    - name: dot notation  #do not use this style
+      debug:
+        var: dic.keys
+```
